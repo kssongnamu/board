@@ -9,16 +9,16 @@
             <div class="mx-5 mt-5">
                 <div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon1">제목</span>
-                    <input type="text" class="form-control" placeholder="제목을 입력해주세요." aria-label="Username" aria-describedby="basic-addon1">
+                    <span class="form-control">제목</span>
                 </div>
                 <div class="input-group">
                     <span class="input-group-text">내용</span>
-                    <textarea class="form-control" aria-label="With textarea"></textarea>
+                    <span class="form-control">내용</span>
                 </div>
             </div>
         </div>
         <div>
-            <a href="/"><button type="button" class="btn btn-outline-dark mt-5">등록</button></a>
+            <a href="/"><button type="button" class="btn btn-outline-dark mt-5">목록</button></a>
         </div>
     </div>
   </template>

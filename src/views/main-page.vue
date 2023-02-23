@@ -1,11 +1,11 @@
 <template>
     <div class="container-sm"> 
-        <nav class="navbar navbar-expand mb-5 border-bottom">
+        <nav class="navbar navbar-expand mt-5">
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold fs-2" href="#">Vue.Board</a>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" data-bs-toggle="modal" data-bs-target="#exampleModal">글쓰기</a>
+                        <a class="nav-link active btn border-0" data-bs-toggle="modal" data-bs-target="#exampleModal">글쓰기</a>
                     </li>
                     <li class="nav-item">
                         <router-link class="nav-link" :to="{ name: 'sign-in', query: { redirect: '/' }}">로그인</router-link>
@@ -18,8 +18,8 @@
                 <thead class="table-light">
                     <tr>
                         <th scope="col">번호</th>
-                        <th scope="col">제목</th>
                         <th scope="col">작성자</th>
+                        <th scope="col">제목</th>
                     </tr>
                 </thead>
                 <tbody>

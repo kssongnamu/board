@@ -1,6 +1,6 @@
 <template>
     <div> 
-        <div class="d-flex justify-content-between px-5 pb-3 border-bottom">
+        <div class="contaier-sm d-flex justify-content-between px-5 pb-3 border-bottom">
             <div class="fw-bord"> 
                 <a href="/"><h1>Vue.board</h1></a>
             </div>

@@ -1,22 +1,18 @@
 <template>
-    <div class="container-sm"> 
-        <div class="d-flex justify-content-between px-5 pb-3 border-bottom">
-            <div class="fw-bord"> 
-                <a href="/"><h1>Vue.board</h1></a>
-            </div>
-        </div>
-        <div class="mx-5 mt-5 text-start">
-            <div class="mb-3">
-                <label class="form-label">제목</label>
+    <div class="container-sm mt-5"> 
+        <h1 class="fw-bold mb-5">Vue.board</h1>
+        <div class="row row-gap-4 fs-5 fw-bold">
+            <div class="row">
+                <label class="form-label p-0">제목</label>
                 <input type="email" class="form-control" placeholder="제목을 입력해 주세요.">
             </div>
-            <div class="mb-3">
-                <label class="form-label">글쓰기</label>
-                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+            <div class="row">
+                <label class="form-label p-0">글쓰기</label>
+                <textarea class="form-control" rows="10"></textarea>
             </div>
         </div>
-        <div>
-            <a href="/view"><button type="button" class="btn btn-outline-dark mt-5">등록</button></a>
+        <div class="row">
+            <router-link to="/view" class="col-2 btn btn-outline-dark mt-5 ms-auto">등록</router-link>
         </div>
     </div>
   </template>

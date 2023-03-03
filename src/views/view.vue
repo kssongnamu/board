@@ -61,10 +61,7 @@
   
 <script>
     export default {
-        name: 'board-cp',
-        props: {
-            msg: String
-        }
+        name: 'view-cp'
     }
 </script>
 

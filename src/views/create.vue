@@ -22,12 +22,9 @@
 </template>
 
 <script>
-export default {
-name: 'board-cp',
-props: {
-    msg: String
-}
-}
+    export default {
+        name: 'create-cp'
+    }
 </script>
 
 <style>

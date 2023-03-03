@@ -9,31 +9,31 @@
                     <div class="mb-3 row">
                         <label for="staticEmail" class="col-4 col-form-label">이름</label>
                         <div class="col-8">
-                            <input type="text" class="form-control" id="staticEmail">
+                            <input type="text" v-model="inputName" class="form-control" id="staticEmail">
                         </div>
                     </div>
                     <div class="mb-3 row">
                         <label for="staticEmail" class="col-4 col-form-label">아이디</label>
                         <div class="col-8">
-                            <input type="text" class="form-control" id="staticEmail">
+                            <input type="text" v-model="inputId" class="form-control" id="staticEmail">
                         </div>
                     </div>
                     <div class="mb-3 row">
                         <label for="staticEmail" class="col-4 col-form-label">비밀번호</label>
                         <div class="col-8">
-                            <input type="password" class="form-control" id="staticEmail">
+                            <input type="password" v-model="inputPwd" class="form-control" id="staticEmail">
                         </div>
                     </div>
                     <div class="mb-3 row">
                         <label for="inputPassword" class="col-4 col-form-label">확인</label>
                         <div class="col-8">
-                            <input type="password" class="form-control" id="inputPassword">
+                            <input type="password" v-model="checkPwd" class="form-control" id="inputPassword">
                         </div>
                     </div>
                     <div class="row mt-5">
                         <div class="col-6 ms-auto">
                             <div class="d-grid">
-                                <router-link :to="{ name: 'sign-in', query: { redirect: $route.query.redirect }}" class="btn btn-outline-dark">회원가입</router-link>
+                                <router-link :to="{ name: 'sign-in', query: { redirect: $route.query.redirect }}" class="btn btn-outline-dark" @click="addUser()" >회원가입</router-link>
                             </div>
                         </div>
                     </div>
@@ -44,7 +44,35 @@
 </template>
 
 <script>
-    export default {
-        
+import $ from 'jquery';
+export default {
+    data() {
+        return{
+            inputName: "",
+            inputId: "",
+            inputPwd: "",
+            checkPwd: ""
+        }
+    },
+    methods: {
+        async addUser() {
+            if (this.inputPwd !== this.checkPwd){
+                return alert("비밀번호가 다릅니다.")
+            }
+
+            let result = await $.ajax({
+                url: 'http://localhost:3000/users',
+                methods: 'post',
+                data: {
+                    "user_name": this.inputName,
+                    "login_id": this.inputId,
+                    "login_pwd": this.inputPwd
+                },
+                dataType: 'json'
+            })
+
+            return result;
+        },
     }
+}
 </script>

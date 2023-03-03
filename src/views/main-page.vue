@@ -6,7 +6,7 @@
                     <router-link class="navbar-brand fw-bold fs-1" to="/">Vue.Board</router-link>
                     <ul class="navbar-nav ms-auto mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link active btn border-0" data-bs-toggle="modal" data-bs-target="#exampleModal">글쓰기</a>
+                            <a class="nav-link active btn border-0" data-bs-toggle="modal" data-bs-target="#Modal">글쓰기</a>
                         </li>
                         <li class="nav-item">
                             <router-link class="nav-link" :to="{ name: 'sign-in', query: { redirect: '/' }}">로그인</router-link>
@@ -31,42 +31,26 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="post, index in postList" :key="post.pid" @click="$router.push('/view')">
-                            <th scope="row"> {{ index + 1 }} </th>                            
+                        <tr v-for="post, index in posts" :key="post.pid" @click="$router.push('/view')">
+                            <th scope="row"> {{ (index + 1) + (pageNum - 1) * 10 }} </th>                            
                             <td>
                                 {{ post.title }} 
                             </td>
-                            <td> {{ post.writer }} </td>
-                            <td> {{ post.date }} </td>
+                            <td> {{ post.user_name }} </td>
+                            <td> {{ post.created_at.slice(0, 10) }} </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item">
-                        <a class="page-link" :href="'?page='+(pageNum - 1)" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    <li :class="['page-item', {'active' : i === pageNum}]" v-for="i in 5" :key="i">
-                        <a class="page-link" :href="`?page=${i}`"> {{ i }} </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" :href="'?page='+(pageNum + 1)" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+            
         </div>
         <div>
             <!-- Modal -->
-            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal fade" id="Modal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">알림</h1>
+                        <h1 class="modal-title fs-5" id="ModalLabel">알림</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -87,59 +71,54 @@
 
 <script>
 import { RouterLink } from 'vue-router';
+import $ from 'jquery';
 
 export default {
     name: "board-cp",
-    props: {
-        msg: String
-    },
+    components: { RouterLink },
     data() {
         return {
-            postList: [
-                {
-                    pid:1,
-                    writer: 'Mark',
-                    title: 'Otto',
-                    date: '2022-05-28'
-                },
-                {
-                    pid:2,
-                    writer: 'Mark',
-                    title: 'Otto',
-                    date: '2022-05-28'
-                },
-                {
-                    pid:3,
-                    writer: 'Mark',
-                    title: 'Otto',
-                    date: '2022-05-28'
-                },
-                {
-                    pid:4,
-                    writer: 'Mark',
-                    title: 'Otto',
-                    date: '2022-05-28'
-                },
-                {
-                    pid:5,
-                    writer: 'Mark',
-                    title: 'Otto',
-                    date: '2022-05-28'
-                },
-            ],
+            posts: [],
             pageNum: 1,
+            pageCount: 0
         }
     },
     mounted() {
         this.loadPostList();
     },
     methods: {
-        loadPostList() {
+        async loadPostList() {
             this.pageNum = (this.$route.query.page === undefined) ? 1 : Number(this.$route.query.page);
-            
+            let rows = await this.getPosts();
+            this.posts = rows.posts
+            let count = await this.getCount();
+            this.pageCount = count.result.count
+            console.log(this.pageCount)
         },
-    },
-    components: { RouterLink }
+
+        async getPosts() {
+            let rows = await $.ajax({
+                url: 'http://localhost:3000/posts',
+                methods: 'GET',
+                data: {
+                    page_no: this.pageNum
+                },
+                dataType: 'json'
+            })
+
+            return rows;
+        },
+
+        async getCount() {
+            let result = await $.ajax({
+                url: 'http://localhost:3000/posts/count',
+                methods: 'GET',
+                dataType: 'json'
+            })
+
+            return result
+        }
+    }
 }
 </script>
 

@@ -1,16 +1,44 @@
 import { createWebHistory, createRouter} from 'vue-router';
-import mainPage from '../views/main-page.vue';
-import create from '../views/create.vue';
-import view from '../views/view.vue';
-import edit from '../views/edit.vue';
-import signIn from '../views/sign-in.vue';
-import signUp from '../views/sign-up.vue';
+import mainPage from '@/views/main-page.vue';
+import create from '@/views/create.vue';
+import view from '@/views/view.vue';
+import edit from '@/views/edit.vue';
+import signIn from '@/views/sign-in.vue';
+import signUp from '@/views/sign-up.vue';
+import authenticate from '@/views/authenticate.vue';
+import store from '@/store';
+
+// const userAuthenticate = (to, from , next)=> {
+//     const userInfo = store.state.user_profile   
+
+//     const token = window.$cookies.get('token')  
+//     if (!token) {
+//         next({path: '/signin', query: {redirect: to.fullPath}})
+//     } else if (!userInfo) {
+//         next({path: '/authenticate', query: {redirect: to.fullPath}})
+//     } else{
+//         next()
+//     }
+// };
+
+
+const privatePage = (to, from , next)=> {    
+    const userProfile = store.state.user_profile       
+    if(userProfile){
+        next()
+    }else{
+        next({path: '/authenticate', query: {redirect: to.fullPath}})
+    }
+};
+
+
 
 const routes = [
     {
         path: '/',
         name: 'main',
-        component: mainPage
+        component: mainPage,
+        beforeEnter: privatePage
     },
     {
         path: '/create',
@@ -18,7 +46,7 @@ const routes = [
         component: create
     },
     {
-        path: '/view',
+        path: '/view/:post_id',
         name: 'view',
         component: view
     },
@@ -36,6 +64,11 @@ const routes = [
         path: '/sign-up',
         name: 'sign-up',
         component: signUp
+    },
+    {
+        path: '/authenticate',
+        name: 'authenticate',
+        component: authenticate
     }
 ];
 

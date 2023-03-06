@@ -7,27 +7,27 @@
             <div class="row">
                 <div class="col-md-6 col-lg-4 ms-auto me-auto">
                     <div class="mb-3 row">
-                        <label for="staticEmail" class="col-4 col-form-label">이름</label>
+                        <label for="userName" class="col-4 col-form-label">이름</label>
                         <div class="col-8">
-                            <input type="text" v-model="inputName" class="form-control" id="staticEmail">
+                            <input type="text" v-model.trim="inputName" class="form-control" id="userName">
                         </div>
                     </div>
                     <div class="mb-3 row">
-                        <label for="staticEmail" class="col-4 col-form-label">아이디</label>
+                        <label for="loginId" class="col-4 col-form-label">아이디</label>
                         <div class="col-8">
-                            <input type="text" v-model="inputId" class="form-control" id="staticEmail">
+                            <input type="text" v-model.trim="inputId" class="form-control" id="loginId">
                         </div>
                     </div>
                     <div class="mb-3 row">
-                        <label for="staticEmail" class="col-4 col-form-label">비밀번호</label>
+                        <label for="loginPwd" class="col-4 col-form-label">비밀번호</label>
                         <div class="col-8">
-                            <input type="password" v-model="inputPwd" class="form-control" id="staticEmail">
+                            <input type="password" v-model.trim="inputPwd" class="form-control" id="loginPwd">
                         </div>
                     </div>
                     <div class="mb-3 row">
-                        <label for="inputPassword" class="col-4 col-form-label">확인</label>
+                        <label for="checkPwd" class="col-4 col-form-label">확인</label>
                         <div class="col-8">
-                            <input type="password" v-model="checkPwd" class="form-control" id="inputPassword">
+                            <input type="password" v-model.trim="checkPwd" class="form-control" id="checkPwd">
                         </div>
                     </div>
                     <div class="row mt-5">
@@ -44,7 +44,6 @@
 </template>
 
 <script>
-import $ from 'jquery';
 export default {
     data() {
         return{
@@ -59,19 +58,19 @@ export default {
             if (this.inputPwd !== this.checkPwd){
                 return alert("비밀번호가 다릅니다.")
             }
-
-            let result = await $.ajax({
-                url: 'http://localhost:3000/users',
-                methods: 'post',
-                data: {
+            await fetch('http://localhost:3000/users',{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
                     "user_name": this.inputName,
                     "login_id": this.inputId,
                     "login_pwd": this.inputPwd
-                },
-                dataType: 'json'
+                })
             })
 
-            return result;
+            return alert("회원가입 되었습니다.");
         },
     }
 }

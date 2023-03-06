@@ -7,15 +7,15 @@
             <div class="fs-5 fw-bold">
                 <div class="row">
                     <label class="form-label p-0">제목</label>
-                    <input type="email" class="form-control mb-3" placeholder="제목을 입력해 주세요.">
+                    <input type="email" class="form-control mb-3" v-model="inputTitle" placeholder="제목을 입력해 주세요.">
                 </div>
                 <div class="row">
                     <label class="form-label p-0">내용</label>
-                    <textarea class="form-control" rows="10"></textarea>
+                    <textarea class="form-control" rows="10" v-model="inputContent" placeholder="내용을 입력해 주세요."></textarea>
                 </div>
             </div>
             <div class="row">
-                <router-link to="/view" class="col-3 col-md-2 col-xl-1 btn btn-outline-dark mt-5 ms-auto">등록</router-link>
+                <div class="col-3 col-md-2 col-xl-1 btn btn-outline-dark mt-5 ms-auto" @click="addPost()">등록</div>
             </div>
         </div>
     </div>
@@ -23,7 +23,39 @@
 
 <script>
     export default {
-        name: 'create-cp'
+        name: 'create-cp',
+        data() {
+            return{
+                inputTitle: "",
+                inputContent: ""
+            }
+        },
+        methods: {
+            async addPost() {
+                const userProfile = this.$store.getters['getUserProfile']
+                const userId = userProfile.user_id;
+                if (this.inputTitle === ''){
+                    return alert("제목을 입력해 주세요.")
+                } else if (this.inputContent === ''){
+                    return alert("내용을 입력해 주세요.")
+                }
+
+                const response = await fetch('http://localhost:3000/posts',{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        "title": this.inputTitle,
+                        "content": this.inputContent,
+                        "user_id": userId
+                    })
+                })
+                const result = await response.json();
+                this.$router.replace({ name: 'view', params: {post_id: result.post_id} })
+                return alert("등록 되었습니다.");
+            },
+        }
     }
 </script>
 

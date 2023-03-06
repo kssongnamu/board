@@ -8,9 +8,12 @@
                         <li class="nav-item">
                             <a class="nav-link active btn border-0" data-bs-toggle="modal" data-bs-target="#Modal">글쓰기</a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="!userProfile">
                             <router-link class="nav-link" :to="{ name: 'sign-in', query: { redirect: '/' }}">로그인</router-link>
-                        </li>                        
+                        </li>     
+                        <li class="nav-item" v-else>
+                            <router-link class="nav-link" :to="{ name: 'sign-in', query: { redirect: '/' }}">로그아웃</router-link>
+                        </li>                     
                     </ul> 
                 </div>
             </nav>        
@@ -31,8 +34,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="post, index in posts" :key="post.pid" @click="$router.push('/view')">
-                            <th scope="row"> {{ (index + 1) + (pageNum - 1) * 10 }} </th>                            
+                        <tr 
+                            v-for="post, index in posts" :key="post.post_id" 
+                            @click="$router.push({ name: 'view', params: {post_id: post.post_id} })"
+                        >
+                            <th scope="row"> {{ (index + 1) + (curPage - 1) * 10 }} </th>                            
                             <td>
                                 {{ post.title }} 
                             </td>
@@ -42,7 +48,7 @@
                     </tbody>
                 </table>
             </div>
-            
+            <page-navigation :curPage="curPage" :postsCount="postsCount" @changePage="changePage"></page-navigation>
         </div>
         <div>
             <!-- Modal -->
@@ -70,69 +76,57 @@
 </template>
 
 <script>
-import { RouterLink } from 'vue-router';
-import $ from 'jquery';
+import pageNavigation from '@/components/page-navigation.vue';
 
 export default {
     name: "board-cp",
-    components: { RouterLink },
+    components: {         
+        pageNavigation
+    },
     data() {
         return {
             posts: [],
-            pageNum: 1,
-            pageCount: 0
+            curPage: 1,
+            postsCount: 0,
+            loginProfile: {}
         }
     },
     mounted() {
-        this.loadPostList();
+        this.loadRows();
+        this.loadCount();
     },
     methods: {
-        async loadPostList() {
-            this.pageNum = (this.$route.query.page === undefined) ? 1 : Number(this.$route.query.page);
+        async loadRows() {
             let rows = await this.getPosts();
             this.posts = rows.posts
+        },
+        async loadCount() {
             let count = await this.getCount();
-            this.pageCount = count.result.count
-            console.log(this.pageCount)
+            this.postsCount = count.result.count
         },
-
+        changePage(curPage) {
+            this.curPage = curPage;
+            this.loadRows();
+        },
         async getPosts() {
-            let rows = await $.ajax({
-                url: 'http://localhost:3000/posts',
-                methods: 'GET',
-                data: {
-                    page_no: this.pageNum
-                },
-                dataType: 'json'
-            })
-
+            let response = await fetch(`http://localhost:3000/posts?page_no=${this.curPage}`)
+            let rows = await response.json();
             return rows;
+        },            
+        async getCount() {
+            let response = await fetch(`http://localhost:3000/posts/count`)
+            let result = await response.json();
+            return result;
         },
 
-        async getCount() {
-            let result = await $.ajax({
-                url: 'http://localhost:3000/posts/count',
-                methods: 'GET',
-                dataType: 'json'
-            })
-
-            return result
+    },
+    computed: {
+        userProfile() {
+            return this.$store.getters['getUserProfile']
         }
     }
 }
 </script>
 
 <style>
-    .navbar .nav-item .nav-link.active{
-        font-weight: bold;
-        color: var(--bs-gray-800);
-    }
-    .pagination .page-item .page-link{
-        color: var(--bs-dark-text);
-    }
-    .pagination .page-item.active>.page-link{
-        background-color: var(--bs-dark-text);
-        color: var(--bs-white);
-        border-color: var(--bs-dark-text)
-    }
 </style>

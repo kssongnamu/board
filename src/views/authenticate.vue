@@ -21,12 +21,12 @@ export default {
             const existsToken = this.$cookies.get('token');
             let redirect = this.$route.query.redirect;            
             try{
-                let response = await fetch(`http://localhost:3000/users/profile`, {headers: {'authorization': existsToken}})
+                let response = await fetch(`http://localhost:3000/users/profile`, {headers: {'authorization': existsToken}});
                 let result = await response.json();
                 this.$store.commit('setUserProfile', result.profile);
-                this.$router.push(redirect)
+                this.$router.push(redirect);
             }catch(e){                
-                this.$router.push(`/sign-in${(redirect) ? `?redirect=${redirect}` : '' }`)
+                this.$router.push(redirect);
             }            
         }
     }

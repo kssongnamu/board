@@ -15,7 +15,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-3 col-md-2 col-xl-1 btn btn-outline-dark mt-5 ms-auto" @click="addPost()">등록</div>
+                <div class="col-3 col-md-2 col-xl-1 btn btn-outline-dark mt-5 ms-auto" @click="onClickAddPost()">등록</div>
             </div>
         </div>
     </div>
@@ -31,7 +31,8 @@
             }
         },
         methods: {
-            async addPost() {
+            async onClickAddPost() {
+                const existsToken = this.$cookies.get('token');
                 const userProfile = this.$store.getters['getUserProfile']
                 const userId = userProfile.user_id;
                 if (this.inputTitle === ''){
@@ -43,7 +44,8 @@
                 const response = await fetch('http://localhost:3000/posts',{
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json;charset=utf-8'
+                        'Content-Type': 'application/json;charset=utf-8',
+                        'authorization': existsToken
                     },
                     body: JSON.stringify({
                         "title": this.inputTitle,

@@ -26,7 +26,7 @@
                         </div>
                         <div class="col-6 ps-1">
                             <div class="d-grid">
-                                <div class="btn btn-outline-dark" @click="login();">로그인</div>
+                                <div class="btn btn-outline-dark" @click="onClickLogin();">로그인</div>
                             </div>
                         </div>
                     </div>
@@ -45,7 +45,7 @@
             }
         },
         methods: {
-            async login() {
+            async onClickLogin() {
                 let response = await fetch(`http://localhost:3000/users?login_id=${this.inputId}&login_pwd=${this.inputPwd}`)
                 let result = await response.json();
                 if (!result.success) {

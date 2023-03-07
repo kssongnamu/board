@@ -1,59 +1,50 @@
 import { createWebHistory, createRouter} from 'vue-router';
-import mainPage from '@/views/main-page.vue';
+import home from '@/views/home.vue';
 import create from '@/views/create.vue';
 import view from '@/views/view.vue';
 import edit from '@/views/edit.vue';
-import signIn from '@/views/sign-in.vue';
-import signUp from '@/views/sign-up.vue';
+import signIn from '@/views/signIn.vue';
+import signUp from '@/views/signUp.vue';
 import authenticate from '@/views/authenticate.vue';
 import store from '@/store';
 
-// const userAuthenticate = (to, from , next)=> {
-//     const userInfo = store.state.user_profile   
+const privatePage = (to, from , next)=> {
+    const userInfo = store.state.user_profile   
 
-//     const token = window.$cookies.get('token')  
-//     if (!token) {
-//         next({path: '/signin', query: {redirect: to.fullPath}})
-//     } else if (!userInfo) {
-//         next({path: '/authenticate', query: {redirect: to.fullPath}})
-//     } else{
-//         next()
-//     }
-// };
-
-
-const privatePage = (to, from , next)=> {    
-    const userProfile = store.state.user_profile       
-    if(userProfile){
+    const token = window.$cookies.get('token')  
+    if (!token) {
         next()
-    }else{
+    } else if (!userInfo) {
         next({path: '/authenticate', query: {redirect: to.fullPath}})
+    } else{
+        next()
     }
 };
-
-
 
 const routes = [
     {
         path: '/',
-        name: 'main',
-        component: mainPage,
+        name: 'home',
+        component: home,
         beforeEnter: privatePage
     },
     {
         path: '/create',
         name: 'create',
-        component: create
+        component: create,
+        beforeEnter: privatePage
     },
     {
         path: '/view/:post_id',
         name: 'view',
-        component: view
+        component: view,
+        beforeEnter: privatePage
     },
     {
-        path: '/edit',
+        path: '/edit/:post_id',
         name: 'edit',
-        component: edit
+        component: edit,
+        beforeEnter: privatePage
     },
     {
         path: '/sign-in',

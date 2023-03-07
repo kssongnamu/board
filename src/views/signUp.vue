@@ -33,7 +33,7 @@
                     <div class="row mt-5">
                         <div class="col-6 ms-auto">
                             <div class="d-grid">
-                                <router-link :to="{ name: 'sign-in', query: { redirect: $route.query.redirect }}" class="btn btn-outline-dark" @click="addUser()" >회원가입</router-link>
+                                <router-link :to="{ name: 'sign-in', query: { redirect: $route.query.redirect }}" class="btn btn-outline-dark" @click="onClickAddUser()" >회원가입</router-link>
                             </div>
                         </div>
                     </div>
@@ -54,7 +54,7 @@ export default {
         }
     },
     methods: {
-        async addUser() {
+        async onClickAddUser() {
             if (this.inputPwd !== this.checkPwd){
                 return alert("비밀번호가 다릅니다.")
             }

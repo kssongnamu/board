@@ -6,7 +6,7 @@
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
-            <li :class="['page-item', {'active' : splitStartNo + i - 1 === currPageNo}]" v-for="i in splitLength" :key="i">
+            <li :class="['page-item', {'active' : splitStartNo + i - 1 === Number(currPageNo)}]" v-for="i in splitLength" :key="i">
                 <a class="page-link" @click="onClickChangePage(splitStartNo + i - 1)"> {{ splitStartNo + i - 1 }} </a>
             </li>
             <li class="page-item">
@@ -22,8 +22,9 @@
     export default {
         name: 'page-navigation',
         props: [
-            'postsCount',
-            'currPageNo'
+            'posts-count',
+            'curr-page-no',
+            'view-page-count'
         ],
         data() {
             return {
@@ -67,8 +68,8 @@
                     this.onClickChangePage(this.splitStartNo)
                 }
             },
-            onClickChangePage(curPage) {
-                this.$emit('onClickChangePage', curPage)
+            onClickChangePage(currPageNo) {
+                this.$emit('onClickChangePage', currPageNo)
             }
         },
         watch: {

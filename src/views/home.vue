@@ -5,22 +5,12 @@
                 <div class="container-fluid p-0">
                     <router-link class="navbar-brand fw-bold fs-1" to="/">Vue.Board</router-link>
                     <ul class="navbar-nav ms-auto mb-lg-0">
-                        <template  v-if="!userProfile">
-                            <li class="nav-item">
-                                <a class="nav-link active btn border-0" data-bs-toggle="modal" data-bs-target="#modal-confirm">글쓰기</a>
-                            </li>
-                            <li class="nav-item">
-                                <router-link class="nav-link" :to="{ name: 'sign-in', query: { redirect: '/' }}">로그인</router-link>
-                            </li>  
-                        </template>   
-                        <template v-else>
-                            <li class="nav-item">
-                                <router-link to="create" class="nav-link active btn border-0">글쓰기</router-link>
-                            </li>
-                            <li class="nav-item">
-                                <div class="nav-link btn border-0" @click="onClickSignOut()">로그아웃</div>
-                            </li>          
-                        </template>              
+                        <li class="nav-item">
+                            <div class="nav-link btn border-0" @click="onClickLogin()">{{ (!userProfile) ? '로그인' : '로그아웃' }}</div>
+                        </li>
+                        <li class="nav-item">
+                            <button type="button" class="nav-link active btn border-0" @click="onClickAddPostBT()">글쓰기</button>
+                        </li>             
                     </ul> 
                 </div>
             </nav>        
@@ -45,7 +35,7 @@
                             v-for="post, index in posts" :key="post.post_id" 
                             @click="$router.push({ name: 'view', params: {post_id: post.post_id} })"
                         >
-                            <th class="text-center" scope="row"> {{ (index + 1) + (currPageNo - 1) * 10 }} </th>                            
+                            <th class="text-center" scope="row"> {{ (index + 1) + (currPageNo - 1) * viewPageCount }} </th>                            
                             <td>
                                 {{ post.title }} 
                             </td>
@@ -55,10 +45,10 @@
                     </tbody>
                 </table>
             </div>
-            <page-navigation :currPageNo="currPageNo" :postsCount="postsCount" @onClickChangePage="onClickChangePage"></page-navigation>
+            <page-navigation :curr-page-no="currPageNo" :posts-count="postsCount" :view-page-count="viewPageCount" @on-click-change-page="onClickChangePage"></page-navigation>
         </div>
-        <modal-confirm :redirect="$route.fullPath"></modal-confirm>
-        <modal-alert></modal-alert>
+        <modal-confirm v-if="confirmMessage" @on-close="confirmMessage=null" @on-confirm="onClickModalLogin()"></modal-confirm>
+        <modal-alert v-if="alertMessage" :alert-message="alertMessage" @on-close="alertMessage=null"></modal-alert>
     </div>
 </template>
 
@@ -78,7 +68,10 @@ export default {
         return {
             posts: [],
             currPageNo: 1,
-            postsCount: 0
+            postsCount: 0,
+            viewPageCount: 10,
+            confirmMessage: null,
+            alertMessage: null
         }
     },
     mounted() {
@@ -96,14 +89,28 @@ export default {
             let result = await response.json();
             this.postsCount = result.result.count;
         },
-        onClickSignOut() {
-            this.$cookies.remove('token');
-            this.$store.commit('setUserProfile', null);
-            alert('로그아웃 되었습니다.')
+        onClickLogin() {
+            if (!this.userProfile) {
+                this.$router.push({name: 'sign-in', query:{redirect: this.$route.fullPath}});
+            } else { 
+                this.$cookies.remove('token');
+                this.$store.commit('setUserProfile', null);
+                this.alertMessage = '로그아웃 되었습니다.';
+            }
         },
         onClickChangePage(currPageNo) {
-            this.currPageNo = currPageNo;
+            this.$router.push(`/?page=${currPageNo}`);
             this.loadPosts();
+        },
+        onClickAddPostBT() {
+            if (!this.userProfile) {
+                this.closeConfirm = true
+            } else {
+                this.$router.push('create')
+            }
+        },
+        onClickModalLogin() {
+            this.$router.push({ name: 'sign-in', query: { redirect:  this.$route.fullPath}})
         }
 
     },

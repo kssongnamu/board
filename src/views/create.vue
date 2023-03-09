@@ -19,46 +19,57 @@
             </div>
         </div>
     </div>
+    <modal-alert v-if="closeAlert" :alert-message="alertMessage" @on-close="closeAlert=false"></modal-alert>
 </template>
 
 <script>
-    export default {
-        name: 'create-cp',
-        data() {
-            return{
-                inputTitle: "",
-                inputContent: ""
-            }
-        },
-        methods: {
-            async onClickAddPost() {
-                const existsToken = this.$cookies.get('token');
-                const userProfile = this.$store.getters['getUserProfile']
-                const userId = userProfile.user_id;
-                if (this.inputTitle === ''){
-                    return alert("제목을 입력해 주세요.")
-                } else if (this.inputContent === ''){
-                    return alert("내용을 입력해 주세요.")
-                }
-
-                const response = await fetch('http://localhost:3000/posts',{
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json;charset=utf-8',
-                        'authorization': existsToken
-                    },
-                    body: JSON.stringify({
-                        "title": this.inputTitle,
-                        "content": this.inputContent,
-                        "user_id": userId
-                    })
-                })
-                const result = await response.json();
-                this.$router.replace({ name: 'view', params: {post_id: result.post_id} })
-                return alert("등록 되었습니다.");
-            },
+import modalAlert from '@/components/modalAlert.vue';
+    
+export default {
+    name: 'create-cp',
+    components: {
+        modalAlert
+    },
+    data() {
+        return{
+            inputTitle: "",
+            inputContent: "",
+            closeAlert: false,
+            alertMessage: ''
         }
+    },
+    methods: {
+        async onClickAddPost() {
+            const existsToken = this.$cookies.get('token');
+            const userProfile = this.$store.getters['getUserProfile']
+            const userId = userProfile.user_id;
+            if (this.inputTitle === ''){
+                this.alertMessage = "제목을 입력해 주세요.";
+                this.closeAlert = true;
+                return;
+            } else if (this.inputContent === ''){
+                this.alertMessage = "내용을 입력해 주세요.";
+                this.closeAlert = true;
+                return;
+            }
+
+            const response = await fetch('http://localhost:3000/posts',{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                    'authorization': existsToken
+                },
+                body: JSON.stringify({
+                    "title": this.inputTitle,
+                    "content": this.inputContent,
+                    "user_id": userId
+                })
+            })
+            const result = await response.json();
+            this.$router.push({ name: 'view', params: {post_id: result.post_id} })
+        },
     }
+}
 </script>
 
 <style>

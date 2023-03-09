@@ -41,22 +41,31 @@
             </div>
         </div>
     </div>
+    <modal-alert v-if="closeAlert" :alertMessage="alertMessage" @on-close="closeAlert=false"></modal-alert>
 </template>
 
 <script>
+import modalAlert from '@/components/modalAlert.vue'
+
 export default {
+    components: {
+        modalAlert
+    },
     data() {
         return{
             inputName: "",
             inputId: "",
             inputPwd: "",
-            checkPwd: ""
+            checkPwd: "",
+            closeAlert:false,
+            alertMessage: ''
         }
     },
     methods: {
         async onClickAddUser() {
             if (this.inputPwd !== this.checkPwd){
-                return alert("비밀번호가 다릅니다.")
+                this.alertMessage = "비밀번호가 다릅니다.";
+                this.closeAlert = true;
             }
             await fetch('http://localhost:3000/users',{
                 method: 'POST',
@@ -69,8 +78,6 @@ export default {
                     "login_pwd": this.inputPwd
                 })
             })
-
-            return alert("회원가입 되었습니다.");
         },
     }
 }

@@ -34,37 +34,46 @@
             </div>        
         </div>
     </div>
+    <modal-alert v-if="closeAlert" :alertMessage="alertMessage" @on-close="closeAlert=false"></modal-alert>
 </template>
 
 <script>
-    export default {
-        data() {
-            return{
-                inputId: "",
-                inputPwd: ""
-            }
-        },
-        methods: {
-            async onClickLogin() {
-                let response = await fetch(`http://localhost:3000/users?login_id=${this.inputId}&login_pwd=${this.inputPwd}`)
-                let result = await response.json();
-                if (!result.success) {
-                    return alert(result.message);
-                }
+import modalAlert from '@/components/modalAlert.vue';
 
-                const profile = {};
-                profile.user_id = result.result.user_id;
-                profile.user_name = result.result.user_name;
-
-                const token = result.result.token;
-                const tokenExp = result.result.token_exp;
-                
-                this.$cookies.set('token', token, new Date(tokenExp));
-                this.$store.commit('setUserProfile', profile);
-
-                let redirect = this.$route.query.redirect;
-                this.$router.replace(redirect);
-            },
+export default {
+    components: {
+        modalAlert
+    },
+    data() {
+        return{
+            inputId: "",
+            inputPwd: "",
+            closeAlert: false,
+            alertMessage: ''
         }
+    },
+    methods: {
+        async onClickLogin() {
+            let response = await fetch(`http://localhost:3000/users?login_id=${this.inputId}&login_pwd=${this.inputPwd}`)
+            let result = await response.json();
+            if (!result.success) {
+                this.alertMessage = result.message;
+                this.closeAlert = true;
+            }
+
+            const profile = {};
+            profile.user_id = result.result.user_id;
+            profile.user_name = result.result.user_name;
+
+            const token = result.result.token;
+            const tokenExp = result.result.token_exp;
+            
+            this.$cookies.set('token', token, new Date(tokenExp));
+            this.$store.commit('setUserProfile', profile);
+
+            let redirect = this.$route.query.redirect;
+            this.$router.replace(redirect);
+        },
     }
+}
 </script>

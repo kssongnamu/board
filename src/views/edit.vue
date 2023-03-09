@@ -19,62 +19,78 @@
             </div>
         </div>
     </div>
+    <modal-alert v-if="closeAlert" :alert-message="alertMessage" @on-close="closeAlert=false"></modal-alert>
 </template>
 
 <script>
-    export default {
-        name: 'create-cp',
-        data() {
-            return{
-                post: {},
-                inputTitle: "",
-                inputContent: ""
+import modalAlert from '@/components/modalAlert.vue';
+
+export default {
+    name: 'create-cp',
+    components: {
+        modalAlert
+    },
+    data() {
+        return{
+            post: {},
+            inputTitle: "",
+            inputContent: "",
+            closeAlert:false,
+            alertMessage: ''
+        }
+    },
+    mounted() {
+        this.loadBeforePost();
+    },
+    methods: {
+        async loadBeforePost() {
+            const postId = this.$route.params.post_id;
+            let response = await fetch(`http://localhost:3000/posts/post?post_id=${postId}`);
+            let result = await response.json();
+            if (!result.success) {
+                return alert(result.message);
+            }
+            this.post = result.post;
+            this.inputTitle = result.post.title;
+            this.inputContent = result.post.content;
+        },
+        async onClickEditPost() {
+            const postId = this.post.post_id;
+            const userId = this.post.user_id;
+            const existsToken = this.$cookies.get('token');
+            if (this.inputTitle === ''){
+                this.alertMessage = "제목을 입력해 주세요.";
+                this.closeAlert = true;
+                return;
+            } else if (this.inputContent === ''){
+                this.alertMessage = "내용을 입력해 주세요.";
+                this.closeAlert = true;
+                return;
+            }
+
+            const response = await fetch('http://localhost:3000/posts',{
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                    'authorization': existsToken
+                },
+                body: JSON.stringify({
+                    "post_id": postId,
+                    "title": this.inputTitle,
+                    "content": this.inputContent,
+                    "user_id": userId
+                })
+            })
+            const result = await response.json();
+
+            this.alertMessage = result.message;
+            this.closeAlert = true;
+            if (result.success) {
+                this.$router.push({ name: 'view', params: {post_id: postId} })
             }
         },
-        mounted() {
-            this.loadBeforePost();
-        },
-        methods: {
-            async loadBeforePost() {
-                const postId = this.$route.params.post_id;
-                let response = await fetch(`http://localhost:3000/posts/post?post_id=${postId}`);
-                let result = await response.json();
-                if (!result.success) {
-                    return alert(result.message);
-                }
-                this.post = result.post;
-                this.inputTitle = result.post.title;
-                this.inputContent = result.post.content;
-            },
-            async onClickEditPost() {
-                const postId = this.post.post_id;
-                const userId = this.post.user_id;
-                const existsToken = this.$cookies.get('token');
-                if (this.inputTitle === ''){
-                    return alert("제목을 입력해 주세요.")
-                } else if (this.inputContent === ''){
-                    return alert("내용을 입력해 주세요.")
-                }
-
-                const response = await fetch('http://localhost:3000/posts',{
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json;charset=utf-8',
-                        'authorization': existsToken
-                    },
-                    body: JSON.stringify({
-                        "post_id": postId,
-                        "title": this.inputTitle,
-                        "content": this.inputContent,
-                        "user_id": userId
-                    })
-                })
-                const result = await response.json();
-                this.$router.replace({ name: 'view', params: {post_id: postId} })
-                return alert(result.message);
-            },
-        }
     }
+}
 </script>
 
 <style>

@@ -1,17 +1,17 @@
 <template>  
-    <div class="modal fade" id="modal-confirm">
+    <div class="modal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5">알림</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" @click="$emit('on-close')"></button>
                 </div>
                 <div class="modal-body">
                     로그인 후 이용 하실 수 있습니다.
                 </div>
                 <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">확인</button>
-                        <router-link :to="{ name: 'sign-in', query: { redirect:  redirect}}" class="btn btn-dark" data-bs-dismiss="modal">로그인</router-link> 
+                    <button type="button" class="btn btn-outline-dark" @click="$emit('on-close')">취소</button>
+                    <button type="button" class="btn btn-dark" @click="$emit('on-confirm')">확인</button>
                 </div>
             </div>
         </div>
@@ -20,9 +20,12 @@
 
 <script>
     export default {
-        name: 'modal-confirm',
-        props:[
-            'redirect'
-        ]
+        name: 'modal-confirm'
     }
 </script>
+<style>
+    .modal {
+        display: block;
+        background-color: rgba(var(--bs-dark-rgb), 0.5);
+    }
+</style>

@@ -18,6 +18,11 @@
                     <div class="col fs-4">{{ post.content }}</div>
                 </div>
             </div>
+            <div class="mt-3" v-if="post.post_id">
+                <div class="row">
+                    <img :src="`http://localhost:3000/img/${post.post_id}/1.png`" />
+                </div>
+            </div>
             <div class="mt-5">
                 <div class="row">
                     <div class="col">
@@ -35,17 +40,21 @@
                 </div>
                 <div class="row">
                     <div class="col fs-6 fw-light"> {{ comment.created_at }} </div>
-                    <div class="col-3 col-md-2 col-xl-1 p-0 btn btn-outline-dark" @click="onClickDeleteComment(comment.comment_id, comment.post_id, comment.user_id)">삭제</div>
+                    <div class="col-3 col-md-2 col-xl-1 p-0 btn btn-outline-dark" v-if="!checkOwnUser(comment.user_id)" @click="onClickDeleteComment(comment.comment_id, comment.post_id, comment.user_id)">삭제</div>
                 </div>
             </div>
             <div class="row">
-                <div class="col-3 col-md-2 col-xl-1 btn btn-outline-dark mt-5 ms-auto" @click="onClickDeletePost()">삭제</div>
-                <div class="col-3 col-md-2 col-xl-1 btn btn-outline-dark mt-5 ms-3" @click="onClickEditPost()">수정</div>
-                <router-link to="/" class="col-3 col-md-2 col-xl-1 btn btn-outline-dark mt-5 ms-3">목록</router-link>
+                <div class="text-end p-0">
+                    <template v-if="!checkOwnUser(post.user_id)">
+                        <div class="col-3 col-md-2 col-xl-1 btn btn-outline-dark mt-5 ms-auto" @click="onClickDeletePost()">삭제</div>
+                        <div class="col-3 col-md-2 col-xl-1 btn btn-outline-dark mt-5 ms-3" @click="onClickEditPost()">수정</div>
+                    </template>
+                    <router-link to="/" class="col-3 col-md-2 col-xl-1 btn btn-outline-dark mt-5 ms-3">목록</router-link>
+                </div>
             </div>
         </div>
-        <modal-confirm v-if="closeConfirm" @on-close="closeConfirm=false" @on-confirm="onClickModalLogin()"></modal-confirm>
-        <modal-alert v-if="closeAlert" :alertMessage="alertMessage" @on-close="closeAlert=false"></modal-alert>
+        <modal-confirm v-if="confirmMessage" :confirm-message="confirmMessage" @on-close="confirmMessage=null" @on-confirm="onClickModalLogin()"></modal-confirm>
+        <modal-alert v-if="alertMessage" :alert-message="alertMessage" @on-close="alertMessage=null"></modal-alert>
     </div>
 </template>
   
@@ -61,15 +70,14 @@ export default {
     },
     data() {
         return{
-            userProfile: {},
             postId: 0,
             post: {},
             comments: [],
             inputComment: '',
             modalType: '',
-            closeConfirm: false,
-            closeAlert: false,
-            alertMessage: ''
+            confirmMessage: null,
+            alertMessage: null,
+            imgSrc: ''
         }
     },
     mounted() {
@@ -78,20 +86,22 @@ export default {
     },
     methods: {
         async loadPost() {
-            this.userProfile = this.$store.getters['getUserProfile'];
             this.postId = this.$route.params.post_id;
             let response = await fetch(`http://localhost:3000/posts/post?post_id=${this.postId}`);
             let result = await response.json();
             if (!result.success) {
                 this.alertMessage = result.message;
-                this.closeAlert = true;
                 return;
             }
             this.post = result.post;
         },
         onClickEditPost() {                
             const OwnUser = this.checkOwnUser(this.post.user_id);
-            if (OwnUser !== 'writer') {
+            if (OwnUser === 'guest') {
+                this.confirmMessage = "로그인 후 이용하실 수 있습니다."
+                return;
+            } else if (OwnUser === 'menber') {
+                this.alertMessage = "수정할 권한이 없습니다."
                 return;
             }
             this.$router.push({name: 'edit', params: {post_id: this.post.post_id}})
@@ -100,7 +110,11 @@ export default {
             const postId = this.post.post_id;
             const userId = this.post.user_id;               
             const OwnUser = this.checkOwnUser(userId);
-            if (OwnUser !== 'writer') {
+            if (OwnUser === 'guest') {
+                this.confirmMessage = "로그인 후 이용하실 수 있습니다."
+                return;
+            } else if (OwnUser === 'menber') {
+                this.alertMessage = "삭제할 권한이 없습니다."
                 return;
             }
             const existsToken = this.$cookies.get('token');             
@@ -112,7 +126,6 @@ export default {
 
             let result = await response.json();
             this.alertMessage = result.message;
-            this.closeAlert = true;
             if (result.success) {
                 this.$router.push('/');
             }
@@ -126,13 +139,12 @@ export default {
         async onClickAddComment() {
             const existsToken = this.$cookies.get('token');
             if (!existsToken) {
-                this.closeConfirm = true
+                this.confirmMessage = "로그인 후 이용하실 수 있습니다."
                 return;
             }
 
             if (this.inputComment === ''){
                 this.alertMessage = '댓글을 입력해 주세요.';
-                this.closeAlert = true;
                 return;
             }
 
@@ -151,13 +163,16 @@ export default {
             
             this.inputComment = '';
             this.alertMessage = '등록 되었습니다.';
-            this.closeAlert = true;
             this.loadComments();  
         },
         async onClickDeleteComment(commentId, postId, userId) {
             const existsToken = this.$cookies.get('token');
             const OwnUser = this.checkOwnUser(userId);
-            if (OwnUser !== 'writer') {
+            if (OwnUser === 'guest') {
+                this.confirmMessage = "로그인 후 이용하실 수 있습니다."
+                return;
+            } else if (OwnUser === 'menber') {
+                this.alertMessage = "삭제할 권한이 없습니다."
                 return;
             }
             
@@ -168,25 +183,26 @@ export default {
 
             let result = await response.json();
             this.alertMessage = result.message;
-            this.closeAlert = true;
             this.loadComments();
         },
         checkOwnUser(userId) {
             if (!this.userProfile){
-                this.closeConfirm = true;
                 return 'guest';
             }else if(this.userProfile.user_id !== userId){
-                this.alertMessage = '권한이 없습니다.';
-                this.closeAlert = true;
                 return 'member';
             }else{
-                return 'writer';
+                return null;
             }
         },
         onClickModalLogin() {
             this.$router.push({ name: 'sign-in', query: { redirect:  this.$route.fullPath}})
         }
-    }
+    },
+    computed: {
+        userProfile() {
+            return this.$store.getters['getUserProfile']
+        }
+    },
 }
 </script>
 

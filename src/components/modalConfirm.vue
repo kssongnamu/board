@@ -7,7 +7,7 @@
                     <button type="button" class="btn-close" @click="$emit('on-close')"></button>
                 </div>
                 <div class="modal-body">
-                    로그인 후 이용 하실 수 있습니다.
+                    {{ confirm-message }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-dark" @click="$emit('on-close')">취소</button>
@@ -20,7 +20,10 @@
 
 <script>
     export default {
-        name: 'modal-confirm'
+        name: 'modal-confirm',
+        props: [
+            'confirm-message'
+        ]
     }
 </script>
 <style>

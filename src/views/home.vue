@@ -8,7 +8,7 @@
                         <li class="nav-item">
                             <div class="nav-link btn border-0" @click="onClickLogin()">{{ (!userProfile) ? '로그인' : '로그아웃' }}</div>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="userProfile">
                             <button type="button" class="nav-link active btn border-0" @click="onClickAddPostBT()">글쓰기</button>
                         </li>             
                     </ul> 
@@ -47,7 +47,7 @@
             </div>
             <page-navigation :curr-page-no="currPageNo" :posts-count="postsCount" :view-page-count="viewPageCount" @on-click-change-page="onClickChangePage"></page-navigation>
         </div>
-        <modal-confirm v-if="confirmMessage" @on-close="confirmMessage=null" @on-confirm="onClickModalLogin()"></modal-confirm>
+        <modal-confirm v-if="confirmMessage" :confirm-message="confirmMessage" @on-close="confirmMessage=null" @on-confirm="onClickModalLogin()"></modal-confirm>
         <modal-alert v-if="alertMessage" :alert-message="alertMessage" @on-close="alertMessage=null"></modal-alert>
     </div>
 </template>
@@ -80,6 +80,7 @@ export default {
     },
     methods: {
         async loadPosts() {
+            this.currPageNo = (this.$route.query.page) ? this.$route.query.page : 1;
             let response = await fetch(`http://localhost:3000/posts?page_no=${this.currPageNo}`)
             let rows = await response.json();
             this.posts = rows.posts;
@@ -100,11 +101,10 @@ export default {
         },
         onClickChangePage(currPageNo) {
             this.$router.push(`/?page=${currPageNo}`);
-            this.loadPosts();
         },
         onClickAddPostBT() {
             if (!this.userProfile) {
-                this.closeConfirm = true
+                this.confirmMessage = '로그인 후 이용하실 수 있습니다.'
             } else {
                 this.$router.push('create')
             }
@@ -117,6 +117,11 @@ export default {
     computed: {
         userProfile() {
             return this.$store.getters['getUserProfile']
+        }
+    },
+    watch: {
+        $route() {
+            this.loadPosts();
         }
     }
 }

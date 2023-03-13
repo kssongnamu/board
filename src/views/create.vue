@@ -15,7 +15,13 @@
                 </div>
                 <div class="row">
                     <label class="form-label p-0">첨부파일</label>
-                    <input class="border p-3" type="file" ref='uploadImageFile' @change="onFileSelected" accept="image/*">
+                    <input class="border p-3" type="file" ref='uploadImageFiles' @change="onFileSelected" accept="image/*" multiple>
+                </div>
+                <div v-if="uploadImageFiles.length > 0">
+                    <div class="row mt-3" v-for="uploadImageFile, index in uploadImageFiles" :key="index">
+                        <div class="col-auto btn-close" @click="this.uploadImageFiles.splice(index, 1);"></div>
+                        <div class="col">{{ uploadImageFile.name }}</div>
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -39,7 +45,7 @@ export default {
             inputTitle: "",
             inputContent: "",
             alertMessage: null,
-            uploadImageFile: ''
+            uploadImageFiles: []
         }
     },
     methods: {
@@ -48,12 +54,16 @@ export default {
             const userProfile = this.$store.getters['getUserProfile']
             const userId = userProfile.user_id;
             const fd = new FormData();
-            if (this.uploadImageFile) {
-                fd.append('upLoadImage', this.uploadImageFile);
+            const fileCount = this.uploadImageFiles.length;
+            if (this.uploadImageFiles) {
+                for(let i = 0; i < fileCount; i++) {
+                    fd.append('upLoadImage', this.uploadImageFiles[i]);
+                }
             }
             fd.append('body', JSON.stringify({
                     "title": this.inputTitle,
                     "content": this.inputContent,
+                    "file_count": fileCount,
                     "user_id": userId
             }));
 
@@ -76,7 +86,18 @@ export default {
             this.$router.push({ name: 'view', params: {post_id: result.post_id} })
         },
         onFileSelected(){
-            this.uploadImageFile = this.$refs.uploadImageFile.files[0]
+            const inputFiles = this.$refs.uploadImageFiles.files
+            for (let i = 0; i < inputFiles.length; i++) {
+                let inputFIle = inputFiles.item(i);
+                for (let uploadImageFile of this.uploadImageFiles){
+                    if (uploadImageFile.name === inputFIle.name) {
+                        this.$refs.uploadImageFiles.value = null;
+                        return this.alertMessage = "중복된 파일이 있습니다.";
+                    }
+                }
+                this.uploadImageFiles.push(inputFIle)
+            }
+            this.$refs.uploadImageFiles.value = null;
         }
     }
 }

@@ -18,9 +18,9 @@
                     <div class="col fs-4">{{ post.content }}</div>
                 </div>
             </div>
-            <div class="mt-3" v-if="post.post_id">
-                <div class="row">
-                    <img :src="`http://localhost:3000/img/${post.post_id}/1.png`" />
+            <div class="mt-3" v-if="post.file_count !== 0">
+                <div class="row" v-for="i in post.file_count" :key="i">
+                    <img :src="`http://localhost:3000/img/${post.post_id}/${i-1}.png`" />
                 </div>
             </div>
             <div class="mt-5">

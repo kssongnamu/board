@@ -13,6 +13,16 @@
                     <label class="form-label p-0">내용</label>
                     <textarea class="form-control" rows="10" v-model="inputContent" placeholder="내용을 입력해 주세요."></textarea>
                 </div>
+                <div class="row">
+                    <label class="form-label p-0">첨부파일</label>
+                    <input class="border p-3" type="file" ref='uploadImageFiles' @change="onFileSelected" accept="image/*" multiple>
+                </div>
+                <div v-if="uploadImageFiles.length > 0">
+                    <div class="row mt-3" v-for="uploadImageFile, index in uploadImageFiles" :key="index">
+                        <div class="col-auto btn-close" @click="this.uploadImageFiles.splice(index, 1);"></div>
+                        <div class="col">{{ uploadImageFile.name }}</div>
+                    </div>
+                </div>
             </div>
             <div class="row">
                 <div class="col-3 col-md-2 col-xl-1 btn btn-outline-dark mt-5 ms-auto" @click="onClickEditPost()">수정</div>
@@ -36,7 +46,8 @@ export default {
             inputTitle: "",
             inputContent: "",
             closeAlert:false,
-            alertMessage: ''
+            alertMessage: '',
+            uploadImageFiles: []
         }
     },
     mounted() {
@@ -89,6 +100,20 @@ export default {
                 this.$router.push({ name: 'view', params: {post_id: postId} })
             }
         },
+        onFileSelected(){
+            const inputFiles = this.$refs.uploadImageFiles.files
+            for (let i = 0; i < inputFiles.length; i++) {
+                let inputFIle = inputFiles.item(i);
+                for (let uploadImageFile of this.uploadImageFiles){
+                    if (uploadImageFile.name === inputFIle.name) {
+                        this.$refs.uploadImageFiles.value = null;
+                        return this.alertMessage = "중복된 파일이 있습니다.";
+                    }
+                }
+                this.uploadImageFiles.push(inputFIle)
+            }
+            this.$refs.uploadImageFiles.value = null;
+        }
     }
 }
 </script>

@@ -7,7 +7,7 @@
                     <button type="button" class="btn-close" @click="$emit('on-close')"></button>
                 </div>
                 <div class="modal-body">
-                    {{ confirm-message }}
+                    {{ confirmMessage }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-dark" @click="$emit('on-close')">취소</button>

@@ -50,11 +50,20 @@ export default {
     },
     methods: {
         async onClickAddPost() {
+            if (this.inputTitle === ''){
+                this.alertMessage = "제목을 입력해 주세요.";
+                return;
+            } else if (this.inputContent === ''){
+                this.alertMessage = "내용을 입력해 주세요.";
+                return;
+            }
+
             const existsToken = this.$cookies.get('token');
             const userProfile = this.$store.getters['getUserProfile']
             const userId = userProfile.user_id;
             const fd = new FormData();
             const fileCount = this.uploadImageFiles.length;
+            
             if (this.uploadImageFiles) {
                 for(let i = 0; i < fileCount; i++) {
                     fd.append('upLoadImage', this.uploadImageFiles[i]);
@@ -63,17 +72,9 @@ export default {
             fd.append('body', JSON.stringify({
                     "title": this.inputTitle,
                     "content": this.inputContent,
-                    "file_count": fileCount,
                     "user_id": userId
             }));
 
-            if (this.inputTitle === ''){
-                this.alertMessage = "제목을 입력해 주세요.";
-                return;
-            } else if (this.inputContent === ''){
-                this.alertMessage = "내용을 입력해 주세요.";
-                return;
-            }
 
             const response = await fetch('http://localhost:3000/posts',{
                 method: 'POST',
@@ -88,14 +89,14 @@ export default {
         onFileSelected(){
             const inputFiles = this.$refs.uploadImageFiles.files
             for (let i = 0; i < inputFiles.length; i++) {
-                let inputFIle = inputFiles.item(i);
+                let inputFile = inputFiles.item(i);
                 for (let uploadImageFile of this.uploadImageFiles){
-                    if (uploadImageFile.name === inputFIle.name) {
+                    if (uploadImageFile.name === inputFile.name) {
                         this.$refs.uploadImageFiles.value = null;
                         return this.alertMessage = "중복된 파일이 있습니다.";
                     }
                 }
-                this.uploadImageFiles.push(inputFIle)
+                this.uploadImageFiles.push(inputFile)
             }
             this.$refs.uploadImageFiles.value = null;
         }

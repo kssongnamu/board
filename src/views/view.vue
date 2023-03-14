@@ -18,12 +18,19 @@
                     <div class="col fs-4">{{ post.content }}</div>
                 </div>
             </div>
-            <div class="mt-3" v-if="post.file_count !== 0">
-                <div class="row" v-for="i in post.file_count" :key="i">
-                    <img :src="`http://localhost:3000/img/${post.post_id}/${i-1}.png`" />
+            <div class="mt-3" v-if="post.file_names">
+                <div class="row" >
+                    <div class="card col-2 p-0 mx-1" v-for="fileJson in fileUrls" :key="fileJson">
+                        <a class="btn btn-light p-0 h-100" :href="fileJson.file_url" :download="fileJson.file_name">
+                            <img class="card-img-top" :src="fileJson.file_url" style="height:70%;object-fit: cover;" />
+                            <div class="card-body" style="text-overflow: ellipsis;">
+                                <p class="card-text text-truncate">{{ fileJson.file_name }}</p>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="mt-5">
+            <div class="mt-3">
                 <div class="row">
                     <div class="col">
                         <textarea class="border w-100 h-100" rows="2" v-model="inputComment"></textarea>
@@ -40,7 +47,13 @@
                 </div>
                 <div class="row">
                     <div class="col fs-6 fw-light"> {{ comment.created_at }} </div>
-                    <div class="col-3 col-md-2 col-xl-1 p-0 btn btn-outline-dark" v-if="!checkOwnUser(comment.user_id)" @click="onClickDeleteComment(comment.comment_id, comment.post_id, comment.user_id)">삭제</div>
+                    <div 
+                        class="col-3 col-md-2 col-xl-1 p-0 btn btn-outline-dark" 
+                        v-if="!checkOwnUser(comment.user_id)" 
+                        @click="onClickDeleteComment(comment.comment_id, comment.post_id, comment.user_id)"
+                    >
+                        삭제
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -77,7 +90,7 @@ export default {
             modalType: '',
             confirmMessage: null,
             alertMessage: null,
-            imgSrc: ''
+            fileUrls: []
         }
     },
     mounted() {
@@ -94,6 +107,17 @@ export default {
                 return;
             }
             this.post = result.post;
+            if (this.post.file_names) {
+                for (let file_name of this.post.file_names) {
+                    let fileJson = {}
+                    let responsefile = await fetch(`http://localhost:3000/${this.post.file_path}/${file_name}`);
+                    let fileBlob = await responsefile.blob();
+                    let fileUrl = URL.createObjectURL(fileBlob);
+                    fileJson.file_name = file_name;
+                    fileJson.file_url = fileUrl;
+                    this.fileUrls.push(fileJson);
+                }
+            }
         },
         onClickEditPost() {                
             const OwnUser = this.checkOwnUser(this.post.user_id);

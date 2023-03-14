@@ -36,7 +36,7 @@
                             @click="$router.push({ name: 'view', params: {post_id: post.post_id} })"
                         >
                             <th class="text-center" scope="row"> {{ (index + 1) + (currPageNo - 1) * viewPageCount }} </th>                            
-                            <td>
+                            <td class="text-truncate">
                                 {{ post.title }} 
                             </td>
                             <td> {{ post.user_name }} </td>

@@ -29,7 +29,7 @@
             </div>
         </div>
     </div>
-    <modal-alert v-if="closeAlert" :alert-message="alertMessage" @on-close="closeAlert=false"></modal-alert>
+    <modal-alert v-if="alertMessage" :alert-message="alertMessage" @on-close="alertMessage=null"></modal-alert>
 </template>
 
 <script>
@@ -45,8 +45,7 @@ export default {
             post: {},
             inputTitle: "",
             inputContent: "",
-            closeAlert:false,
-            alertMessage: '',
+            alertMessage: null,
             uploadImageFiles: []
         }
     },
@@ -61,41 +60,57 @@ export default {
             if (!result.success) {
                 return alert(result.message);
             }
+
             this.post = result.post;
+            if (this.post.file_names) {
+                for (let file_name of this.post.file_names) {
+                    let responsefile = await fetch(`http://localhost:3000/${this.post.file_path}/${file_name}`);
+                    let fileBlob = await responsefile.blob();
+                    let blobToFile = new File([fileBlob], file_name)
+                    this.uploadImageFiles.push(blobToFile)
+                }
+            }
+            
             this.inputTitle = result.post.title;
             this.inputContent = result.post.content;
         },
         async onClickEditPost() {
-            const postId = this.post.post_id;
-            const userId = this.post.user_id;
-            const existsToken = this.$cookies.get('token');
             if (this.inputTitle === ''){
                 this.alertMessage = "제목을 입력해 주세요.";
-                this.closeAlert = true;
                 return;
             } else if (this.inputContent === ''){
                 this.alertMessage = "내용을 입력해 주세요.";
-                this.closeAlert = true;
                 return;
             }
 
-            const response = await fetch('http://localhost:3000/posts',{
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json;charset=utf-8',
-                    'authorization': existsToken
-                },
-                body: JSON.stringify({
+            const postId = this.post.post_id;
+            const userId = this.post.user_id;
+            const existsToken = this.$cookies.get('token');
+            const fd = new FormData();
+            const fileCount = this.uploadImageFiles.length;
+
+            if (this.uploadImageFiles) {
+                for(let i = 0; i < fileCount; i++) {
+                    fd.append('upLoadImage', this.uploadImageFiles[i]);
+                }
+            }
+            fd.append('body', JSON.stringify({
                     "post_id": postId,
                     "title": this.inputTitle,
                     "content": this.inputContent,
                     "user_id": userId
-                })
+            }));
+
+            const response = await fetch('http://localhost:3000/posts',{
+                method: 'PUT',
+                headers: {
+                    'authorization': existsToken
+                },
+                body: fd
             })
             const result = await response.json();
 
             this.alertMessage = result.message;
-            this.closeAlert = true;
             if (result.success) {
                 this.$router.push({ name: 'view', params: {post_id: postId} })
             }
